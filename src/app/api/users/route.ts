@@ -123,28 +123,48 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const userData = createUserSchema.parse(body)
 
-    // Check if username is available
-    const isAvailable = await WalletVerificationService.isUsernameAvailable(userData.username)
-    if (!isAvailable) {
-      return NextResponse.json({ error: "Username already taken" }, { status: 400 });
-    }
+    // Check if wallet address already exists
+    const existingUser = await prisma.user.findUnique({
+      where: { walletAddress: userData.walletAddress }
+    })
 
-    // Check if wallet address is already registered
-    const existingUser = await WalletVerificationService.getUserByWallet(userData.walletAddress)
     if (existingUser) {
-      return NextResponse.json({ error: "Wallet address already registered" }, { status: 400 });
+      return NextResponse.json({ error: "User with this wallet already exists" }, { status: 400 })
     }
-    
-    // Create user
-    const user = await WalletVerificationService.createUser(userData)
 
-    return NextResponse.json({ user }, { status: 201 });
+    // Check if username already exists
+    const existingUsername = await prisma.user.findUnique({
+      where: { username: userData.username.toLowerCase() }
+    })
+
+    if (existingUsername) {
+      return NextResponse.json({ error: "Username already taken" }, { status: 400 })
+    }
+
+    // Create new user
+    const newUser = await prisma.user.create({
+      data: {
+        walletAddress: userData.walletAddress,
+        name: userData.name,
+        username: userData.username.toLowerCase(),
+        bio: userData.bio || '',
+        role: userData.role,
+        categories: userData.categories || [],
+        avatarUrl: userData.avatarUrl,
+        isVerified: false,
+        rating: 0,
+        totalEarned: 0,
+        totalSpent: 0,
+      }
+    })
+
+    return NextResponse.json({ user: newUser }, { status: 201 })
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: "Validation error", details: error.errors }, { status: 400 });
+      return NextResponse.json({ error: "Validation error", details: error.errors }, { status: 400 })
     }
     console.error('Create user error:', error)
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }
 

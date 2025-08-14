@@ -79,10 +79,18 @@ export default function OnboardingPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username }),
       })
+      
+      if (!response.ok) {
+        console.error('Username check failed:', response.status)
+        setUsernameAvailable(null)
+        return
+      }
+      
       const data = await response.json()
       setUsernameAvailable(data.available)
     } catch (error) {
       console.error('Username check error:', error)
+      setUsernameAvailable(null)
     } finally {
       setCheckingUsername(false)
     }
@@ -146,8 +154,9 @@ export default function OnboardingPage() {
       })
 
       if (response.ok) {
-        // Refresh session and redirect to dashboard
-        router.push(formData.role === 'FREELANCER' ? '/freelancer' : '/hirer')
+        // Redirect to dashboard
+        const dashboardPath = formData.role === 'FREELANCER' ? '/dashboard/freelancer' : '/dashboard/hirer'
+        router.push(dashboardPath)
       } else {
         const error = await response.json()
         setErrors({ submit: error.error || 'Failed to create account' })

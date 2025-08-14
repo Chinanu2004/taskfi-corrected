@@ -123,7 +123,6 @@ export async function GET(request: NextRequest) {
               rating: true,
               isVerified: true,
               totalEarned: true,
-              completedJobs: true,
             },
           },
           category: {

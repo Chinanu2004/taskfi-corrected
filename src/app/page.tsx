@@ -4,20 +4,29 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useWallet } from '@solana/wallet-adapter-react'
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui'
-import { signIn, signOut, useSession } from 'next-auth/react'
+import { signIn, signOut, useSession, getSession } from 'next-auth/react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { useToast } from '@/hooks/use-toast'
 import { SigninMessage } from '@/lib/auth/SigninMessage'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
 import { Shield, Zap, Users, TrendingUp } from 'lucide-react'
+import bs58 from 'bs58'
 
 export default function Home() {
   const router = useRouter()
   const { toast } = useToast()
-  const { publicKey, signMessage, connected } = useWallet()
   const { data: session, status } = useSession()
   const [isSigningIn, setIsSigningIn] = useState(false)
+  const [mounted, setMounted] = useState(false)
+  
+  // Initialize wallet hook after component mounts to prevent hydration issues
+  const wallet = useWallet()
+  const { publicKey, signMessage, connected } = mounted ? wallet : { publicKey: null, signMessage: null, connected: false }
+  
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   const handleWalletAuth = async () => {
     if (!publicKey || !signMessage) return
@@ -33,9 +42,9 @@ export default function Home() {
 
       const messageToSign = message.prepare()
       const signature = await signMessage(new TextEncoder().encode(messageToSign))
-      const signatureBase58 = Buffer.from(signature).toString('base64')
+      const signatureBase58 = bs58.encode(signature)
 
-      await signIn('credentials', {
+      const result = await signIn('credentials', {
         message: JSON.stringify({
           domain: message.domain,
           publicKey: message.publicKey,
@@ -45,18 +54,46 @@ export default function Home() {
         signature: signatureBase58,
         redirect: false,
       })
+
+      if (result?.error) {
+        console.error('Sign in error:', result.error)
+        toast({
+          title: 'Authentication Failed',
+          description: 'Please try connecting your wallet again.',
+          variant: 'destructive'
+        })
+        return
+      }
+
+      // Force session update to get the latest user data
+      const updatedSession = await getSession()
+      
+      if (updatedSession?.user?.id === 'new-user') {
+        router.push('/onboarding')
+      } else if (updatedSession?.user) {
+        const dashboardPath = updatedSession.user.role === 'ADMIN' ? '/dashboard/admin' : 
+                              updatedSession.user.role === 'FREELANCER' ? '/dashboard/freelancer' : '/dashboard/hirer'
+        router.push(dashboardPath)
+      }
+      
     } catch (error) {
       console.error('Authentication error:', error)
+      toast({
+        title: 'Error',
+        description: 'Failed to authenticate. Please try again.',
+        variant: 'destructive'
+      })
     } finally {
       setIsSigningIn(false)
     }
   }
 
   useEffect(() => {
-    if (connected && publicKey && !session && status !== 'loading') {
+    // Only attempt authentication if component is mounted, wallet is connected, has public key, no existing session, and not currently loading
+    if (mounted && connected && publicKey && !session && status === 'unauthenticated' && !isSigningIn) {
       handleWalletAuth()
     }
-  }, [connected, publicKey, session, status])
+  }, [mounted, connected, publicKey, session, status, isSigningIn])
 
   if (session && session.user.id === 'new-user') {
     // Redirect to onboarding for new users
@@ -66,10 +103,25 @@ export default function Home() {
 
   if (session && session.user.id !== 'new-user') {
     // Redirect to dashboard for existing users
-    const dashboardPath = session.user.role === 'ADMIN' ? '/admin' : 
-                          session.user.role === 'FREELANCER' ? '/freelancer' : '/hirer'
+    const dashboardPath = session.user.role === 'ADMIN' ? '/dashboard/admin' : 
+                          session.user.role === 'FREELANCER' ? '/dashboard/freelancer' : '/dashboard/hirer'
     router.push(dashboardPath)
     return null
+  }
+
+  // Show loading state while hydrating to prevent wallet context errors
+  if (!mounted) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background to-background/80 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center mx-auto mb-4">
+            <Zap className="h-5 w-5 text-white animate-pulse" />
+          </div>
+          <span className="text-xl font-bold gradient-text">TaskFi</span>
+          <p className="text-muted-foreground mt-2">Loading...</p>
+        </div>
+      </div>
+    )
   }
 
   return (

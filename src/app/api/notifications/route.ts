@@ -9,8 +9,10 @@ export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     if (!session || !session.user) {
-      return NextResponse.json({ error: 'Unauthorized'  }, { status: 401 });;
-     const { searchParams } = new URL(request.url);
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '20');
     const unreadOnly = searchParams.get('unreadOnly') === 'true';
@@ -24,9 +26,13 @@ export async function GET(request: NextRequest) {
 
     if (unreadOnly) {
       where.isRead = false;
-     if (type && type !== 'all') {
+    }
+
+    if (type && type !== 'all') {
       where.type = type;
-     // Get notifications
+    }
+
+    // Get notifications
     const notifications = await prisma.notification.findMany({
       where,
       orderBy: { createdAt: 'desc' },
@@ -58,12 +64,17 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('Error fetching notifications:', error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
-   export async function PATCH(request: NextRequest) {
+  }
+}
+
+export async function PATCH(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     if (!session || !session.user) {
-      return NextResponse.json({ error: 'Unauthorized'  }, { status: 401 });;
-     const body = await request.json();
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const body = await request.json();
     const { action, notificationIds } = body;
 
     if (action === 'markAsRead') {
@@ -89,11 +100,15 @@ export async function GET(request: NextRequest) {
             isRead: true,
           },
         });
-       return NextResponse.json({
+      }
+
+      return NextResponse.json({
         message: 'Notifications marked as read',
         success: true,
       });
-     if (action === 'delete') {
+    }
+
+    if (action === 'delete') {
       if (notificationIds && Array.isArray(notificationIds)) {
         await prisma.notification.deleteMany({
           where: {
@@ -109,10 +124,9 @@ export async function GET(request: NextRequest) {
       }
     }
 
+    return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
+  } catch (error) {
+    console.error('Error updating notifications:', error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
-
-
-}
-}}
 }
