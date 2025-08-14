@@ -3,15 +3,16 @@ import { getServerSession } from 'next-auth'
 import { authOptions, PermissionService } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 
-
 // GET /api/users/[id] - Get user profile
 export async function GET(request: NextRequest, props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
-    try {
+    
     if (!session) {
       return NextResponse.json({ error: 'Unauthorized'  }, { status: 401 });
+    }
+
     const user = await prisma.user.findUnique({
       where: { id: params.id },
       include: {
@@ -69,6 +70,8 @@ export async function GET(request: NextRequest, props: { params: Promise<{ id: s
 
     if (!user) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 })
+    }
+
     // Remove sensitive data if not own profile and not admin
     if (session.user.id !== params.id && !PermissionService.canAccessUserManagement(session.user.role)) {
       const publicProfile = {
@@ -86,20 +89,31 @@ export async function GET(request: NextRequest, props: { params: Promise<{ id: s
         jobsAsHirer: user.jobsAsHirer,
         receivedReviews: user.receivedReviews,
         _count: user._count,
-       return NextResponse.json({ user });
+      };
+      return NextResponse.json({ user: publicProfile });
+    }
+
+    return NextResponse.json({ user });
   } catch (error) {
     console.error('Get user profile error:', error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
-// DELETE /api/users/[id] - Delete user (admin only);
+  }
+}
+
+// DELETE /api/users/[id] - Delete user (admin only)
 export async function DELETE(request: NextRequest, props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
   try {
-    try {
     const session = await getServerSession(authOptions);
+    
     if (!session) {
       return NextResponse.json({ error: 'Unauthorized'  }, { status: 401 });
+    }
+
     if (!PermissionService.canAccessUserManagement(session.user.role)) {
-    return NextResponse.json({ error: "Internal server error" }, { status: 400 });
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
     // Soft delete by setting isActive to false
     await prisma.user.update({
       where: { id: params.id },
@@ -111,7 +125,4 @@ export async function DELETE(request: NextRequest, props: { params: Promise<{ id
     console.error('Delete user error:', error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
-
-
 }
-}}}

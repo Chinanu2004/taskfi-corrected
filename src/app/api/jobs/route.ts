@@ -47,16 +47,16 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const query = getJobsQuerySchema.parse({
-      category: searchParams.get('category'),
-      minBudget: searchParams.get('minBudget'),
-      maxBudget: searchParams.get('maxBudget'),
-      search: searchParams.get('search'),
-      status: searchParams.get('status'),
-      urgent: searchParams.get('urgent'),
-      page: searchParams.get('page'),
-      limit: searchParams.get('limit'),
-      sortBy: searchParams.get('sortBy'),
-      sortOrder: searchParams.get('sortOrder'),
+      category: searchParams.get('category') || undefined,
+      minBudget: searchParams.get('minBudget') || undefined,
+      maxBudget: searchParams.get('maxBudget') || undefined,
+      search: searchParams.get('search') || undefined,
+      status: searchParams.get('status') || undefined,
+      urgent: searchParams.get('urgent') || undefined,
+      page: searchParams.get('page') || '1',
+      limit: searchParams.get('limit') || '10',
+      sortBy: searchParams.get('sortBy') || 'createdAt',
+      sortOrder: searchParams.get('sortOrder') || 'desc',
     })
 
     const page = parseInt(query.page)

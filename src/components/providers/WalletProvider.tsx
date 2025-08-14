@@ -14,7 +14,7 @@ import { GlowWalletAdapter } from '@solana/wallet-adapter-glow'
 import { SlopeWalletAdapter } from '@solana/wallet-adapter-slope'
 import { WalletModalProvider } from '@solana/wallet-adapter-react-ui'
 import { clusterApiUrl } from '@solana/web3.js'
-import { useMemo, ReactNode } from 'react'
+import { useMemo, ReactNode, useEffect, useState } from 'react'
 
 import '@solana/wallet-adapter-react-ui/styles.css'
 
@@ -23,6 +23,12 @@ interface Props {
 }
 
 export default function WalletContextProvider({ children }: Props) {
+  const [mounted, setMounted] = useState(false)
+  
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+  
   const network = useMemo(() => {
     const envNetwork = process.env.NEXT_PUBLIC_SOLANA_NETWORK
     if (envNetwork === 'mainnet-beta') return WalletAdapterNetwork.Mainnet
@@ -52,6 +58,11 @@ export default function WalletContextProvider({ children }: Props) {
     [network]
   )
 
+  // Prevent hydration issues by only rendering wallet provider on client-side
+  if (!mounted) {
+    return <>{children}</>
+  }
+  
   return (
     <ConnectionProvider endpoint={endpoint}>
       <WalletProvider wallets={wallets} autoConnect>

@@ -48,6 +48,7 @@
     "next": "15.4.6",
     "next-auth": "^4.24.11",
     "next-seo": "^6.6.0",
+    "next-themes": "^0.4.6",
     "pino-pretty": "^13.1.1",
     "prisma": "^6.13.0",
     "pusher": "^5.2.0",

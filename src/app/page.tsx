@@ -1,15 +1,20 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { useWallet } from '@solana/wallet-adapter-react'
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui'
 import { signIn, signOut, useSession } from 'next-auth/react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { useToast } from '@/hooks/use-toast'
 import { SigninMessage } from '@/lib/auth/SigninMessage'
+import { ThemeToggle } from '@/components/ui/theme-toggle'
 import { Shield, Zap, Users, TrendingUp } from 'lucide-react'
 
 export default function Home() {
+  const router = useRouter()
+  const { toast } = useToast()
   const { publicKey, signMessage, connected } = useWallet()
   const { data: session, status } = useSession()
   const [isSigningIn, setIsSigningIn] = useState(false)
@@ -55,7 +60,7 @@ export default function Home() {
 
   if (session && session.user.id === 'new-user') {
     // Redirect to onboarding for new users
-    window.location.href = '/onboarding'
+    router.push('/onboarding')
     return null
   }
 
@@ -63,7 +68,7 @@ export default function Home() {
     // Redirect to dashboard for existing users
     const dashboardPath = session.user.role === 'ADMIN' ? '/admin' : 
                           session.user.role === 'FREELANCER' ? '/freelancer' : '/hirer'
-    window.location.href = dashboardPath
+    router.push(dashboardPath)
     return null
   }
 
@@ -80,6 +85,7 @@ export default function Home() {
           </div>
           
           <div className="flex items-center space-x-4">
+            <ThemeToggle />
             {session ? (
               <Button onClick={() => signOut()} variant="outline">Sign Out</Button>
             ) : (
@@ -117,8 +123,23 @@ export default function Home() {
               </Button>
             )}
             
-            <Button variant="outline" size="xl" className="border-primary/50">
-              Explore Jobs
+            <Button 
+              variant="outline" 
+              size="xl" 
+              className="border-primary/50"
+              onClick={() => {
+                if (!publicKey) {
+                  toast({
+                    title: "Connect Wallet",
+                    description: "Please connect your wallet to browse gigs",
+                    variant: "destructive"
+                  })
+                  return
+                }
+                router.push('/browse/gigs')
+              }}
+            >
+              Browse Gigs
             </Button>
           </div>
 

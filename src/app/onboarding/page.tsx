@@ -147,7 +147,7 @@ export default function OnboardingPage() {
 
       if (response.ok) {
         // Refresh session and redirect to dashboard
-        window.location.href = formData.role === 'FREELANCER' ? '/freelancer' : '/hirer'
+        router.push(formData.role === 'FREELANCER' ? '/freelancer' : '/hirer')
       } else {
         const error = await response.json()
         setErrors({ submit: error.error || 'Failed to create account' })

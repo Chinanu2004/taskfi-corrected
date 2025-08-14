@@ -54,18 +54,18 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const query = getGigsQuerySchema.parse({
-      category: searchParams.get('category'),
-      minPrice: searchParams.get('minPrice'),
-      maxPrice: searchParams.get('maxPrice'),
-      search: searchParams.get('search'),
-      status: searchParams.get('status'),
-      freelancer: searchParams.get('freelancer'),
-      deliveryTime: searchParams.get('deliveryTime'),
-      rating: searchParams.get('rating'),
-      page: searchParams.get('page'),
-      limit: searchParams.get('limit'),
-      sortBy: searchParams.get('sortBy'),
-      sortOrder: searchParams.get('sortOrder'),
+      category: searchParams.get('category') || undefined,
+      minPrice: searchParams.get('minPrice') || undefined,
+      maxPrice: searchParams.get('maxPrice') || undefined,
+      search: searchParams.get('search') || undefined,
+      status: searchParams.get('status') || undefined,
+      freelancer: searchParams.get('freelancer') || undefined,
+      deliveryTime: searchParams.get('deliveryTime') || undefined,
+      rating: searchParams.get('rating') || undefined,
+      page: searchParams.get('page') || '1',
+      limit: searchParams.get('limit') || '12',
+      sortBy: searchParams.get('sortBy') || 'createdAt',
+      sortOrder: searchParams.get('sortOrder') || 'desc',
     })
 
     const page = parseInt(query.page)
