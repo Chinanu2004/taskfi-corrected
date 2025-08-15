@@ -7,12 +7,15 @@ const prisma = new PrismaClient();
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string }  ) {
+  { params }: { params: { id: string } }
+) {
   try {
     const session = await getServerSession(authOptions);
     if (!session || !session.user) {
-      return NextResponse.json({ error: 'Unauthorized'  }, { status: 401 });;
-     const jobId = params.id;
+      return NextResponse.json({ error: 'Unauthorized'  }, { status: 401 });
+    }
+    
+    const jobId = params.id;
 
     // Check if job exists
     const job = await prisma.job.findUnique({
@@ -22,13 +25,17 @@ export async function POST(
 
     if (!job) {
       return NextResponse.json({ error: 'Job not found' }, { status: 404 });
-     // Don't count views from the job hirer themselves
+    }
+    
+    // Don't count views from the job hirer themselves
     if (job.hirerId === session.user.id) {
       return NextResponse.json({ 
         message: 'View not counted for job owner',
         views: job.views 
       });
-     // Check if user has already viewed this job in the last 24 hours
+    }
+    
+    // Check if user has already viewed this job in the last 24 hours
     const recentView = await prisma.jobView.findFirst({
       where: {
         jobId: jobId,
@@ -44,7 +51,9 @@ export async function POST(
         message: 'View already counted recently',
         views: job.views 
       });
-     // Record the view and increment the counter
+    }
+    
+    // Record the view and increment the counter
     await prisma.$transaction([
       // Create view record
       prisma.jobView.create({
@@ -78,8 +87,4 @@ export async function POST(
     console.error('Error recording job view:', error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
-
-
 }
-}}
-}}}

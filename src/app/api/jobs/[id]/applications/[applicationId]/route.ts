@@ -19,7 +19,9 @@ export async function GET(request: NextRequest, props: { params: Promise<{ id: s
     const session = await getServerSession(authOptions);
     if (!session) {
       return NextResponse.json({ error: 'Unauthorized'  }, { status: 401 });
-     const application = await prisma.jobApplication.findFirst({
+    }
+    
+    const application = await prisma.jobApplication.findFirst({
       where: { 
         id: params.applicationId,
         jobId: params.id 
@@ -57,10 +59,13 @@ export async function GET(request: NextRequest, props: { params: Promise<{ id: s
           },
         },
       }
+    });
 
     if (!application) {
       return NextResponse.json({ error: 'Application not found' }, { status: 404 })
-     // Check permissions - job owner, applicant, or admin
+    }
+    
+    // Check permissions - job owner, applicant, or admin
     const canView = 
       application.job.hirerId === session.user.id || 
       application.freelancerId === session.user.id ||
@@ -68,15 +73,22 @@ export async function GET(request: NextRequest, props: { params: Promise<{ id: s
 
     if (!canView) {
       return NextResponse.json({ error: 'Forbidden'  }, { status: 403 });
-     // Hide sensitive data for non-owners
+    }
+    
+    // Hide sensitive data for non-owners
     if (application.job.hirerId !== session.user.id && !PermissionService.canAccessUserManagement(session.user.role)) {
       const { coverLetter, proposedBudget, estimatedDays, attachments, ...publicData } = application
       return NextResponse.json({ application: publicData });
-     return NextResponse.json({ application });
+    }
+    
+    return NextResponse.json({ application });
   } catch (error) {
     console.error('Get application error:', error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
-   // PUT /api/jobs/[id]/applications/[applicationId] - Update application (freelancer only)
+  }
+}
+
+// PUT /api/jobs/[id]/applications/[applicationId] - Update application (freelancer only)
 export async function PUT(request: NextRequest, props: { params: Promise<{ id: string; applicationId: string }> }) {
   const params = await props.params;
   try {
@@ -98,19 +110,28 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ id: s
             status: true,
             budget: true,
             title: true,
-           })
+          }
+        }
+      }
+    });
 
     if (!application) {
       return NextResponse.json({ error: 'Application not found' }, { status: 404 })
-     // Only the applicant can update their own application
+    }
+    
+    // Only the applicant can update their own application
     if (application.freelancerId !== session.user.id) {
       return NextResponse.json({ error: 'Can only update your own applications' }, { status: 403 })
-     // Can only update pending applications
+    }
+    
+    // Can only update pending applications
     if (application.isAccepted !== null) {
       return NextResponse.json({ 
         error: 'Cannot update application that has already been processed' 
       }, { status: 400 })
-     // Can only update applications for open jobs
+    }
+    
+    // Can only update applications for open jobs
     if (application.job.status !== 'OPEN') {
       return NextResponse.json({ 
         error: 'Cannot update application for non-open jobs' 
@@ -120,9 +141,9 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ id: s
     // Validate proposed budget if provided
     if (updateData.proposedBudget && updateData.proposedBudget > application.job.budget * 1.2) {
       return NextResponse.json({ 
-        error: `Proposed budget cannot}
- exceed ${(application.job.budget * 1.2).toFixed(2)}` 
+        error: `Proposed budget cannot exceed ${(application.job.budget * 1.2).toFixed(2)}` 
       }, { status: 400 })
+    }
     }
     const updatedApplication = await prisma.jobApplication.update({
       where: { id: params.applicationId },
@@ -136,22 +157,31 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ id: s
             avatarUrl: true,
             rating: true,
             isVerified: true,
-           })
+          }
+        }
+      }
+    });
 
     return NextResponse.json({ application: updatedApplication });
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: "Invalid application data" }, { status: 400 });
-     console.error('Update application error:', error)
+    }
+    console.error('Update application error:', error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
-   // DELETE /api/jobs/[id]/applications/[applicationId] - Withdraw application
+  }
+}
+
+// DELETE /api/jobs/[id]/applications/[applicationId] - Withdraw application
 export async function DELETE(request: NextRequest, props: { params: Promise<{ id: string; applicationId: string }> }) {
   const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session) {
       return NextResponse.json({ error: 'Unauthorized'  }, { status: 401 });
-     // Find application and verify ownership
+    }
+    
+    // Find application and verify ownership
     const application = await prisma.jobApplication.findFirst({
       where: { 
         id: params.applicationId,
@@ -163,11 +193,16 @@ export async function DELETE(request: NextRequest, props: { params: Promise<{ id
             status: true,
             title: true,
             hirerId: true,
-           })
+          }
+        }
+      }
+    });
 
     if (!application) {
-      return NextResponse.json({ error: 'Application not found' }, { status: 404 })
-     // Only the applicant or admin can delete the application
+      return NextResponse.json({ error: 'Application not found' }, { status: 404 });
+    }
+    
+    // Only the applicant or admin can delete the application
     const canDelete = 
       application.freelancerId === session.user.id || 
       PermissionService.canAccessUserManagement(session.user.role)
@@ -182,7 +217,8 @@ export async function DELETE(request: NextRequest, props: { params: Promise<{ id
      // Delete the application
     await prisma.$transaction(async (tx) => {
       await tx.jobApplication.delete({
-        where: { id: params.applicationId  })
+        where: { id: params.applicationId }
+      });
 
       // Notify job owner if application was withdrawn (not rejected)
       if (application.isAccepted === null && application.freelancerId === session.user.id) {

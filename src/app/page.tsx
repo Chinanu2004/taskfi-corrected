@@ -95,18 +95,45 @@ export default function Home() {
     }
   }, [mounted, connected, publicKey, session, status, isSigningIn])
 
+  // Handle navigation for authenticated users
+  useEffect(() => {
+    if (session && session.user.id === 'new-user') {
+      router.push('/onboarding')
+    } else if (session && session.user.id !== 'new-user') {
+      const dashboardPath = session.user.role === 'ADMIN' ? '/dashboard/admin' : 
+                            session.user.role === 'FREELANCER' ? '/dashboard/freelancer' : '/dashboard/hirer'
+      router.push(dashboardPath)
+    }
+  }, [session, router])
+
   if (session && session.user.id === 'new-user') {
-    // Redirect to onboarding for new users
-    router.push('/onboarding')
-    return null
+    // Show loading while redirecting to onboarding
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background to-background/80 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center mx-auto mb-4">
+            <Zap className="h-5 w-5 text-white animate-pulse" />
+          </div>
+          <span className="text-xl font-bold gradient-text">TaskFi</span>
+          <p className="text-muted-foreground mt-2">Redirecting to setup...</p>
+        </div>
+      </div>
+    )
   }
 
   if (session && session.user.id !== 'new-user') {
-    // Redirect to dashboard for existing users
-    const dashboardPath = session.user.role === 'ADMIN' ? '/dashboard/admin' : 
-                          session.user.role === 'FREELANCER' ? '/dashboard/freelancer' : '/dashboard/hirer'
-    router.push(dashboardPath)
-    return null
+    // Show loading while redirecting to dashboard
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background to-background/80 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center mx-auto mb-4">
+            <Zap className="h-5 w-5 text-white animate-pulse" />
+          </div>
+          <span className="text-xl font-bold gradient-text">TaskFi</span>
+          <p className="text-muted-foreground mt-2">Redirecting to dashboard...</p>
+        </div>
+      </div>
+    )
   }
 
   // Show loading state while hydrating to prevent wallet context errors
@@ -126,20 +153,23 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-background/80">
-      {/* Header */}
-      <header className="border-b border-border/40 backdrop-blur-sm bg-background/80">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center">
-              <Zap className="h-5 w-5 text-white" />
+      {/* Premium Header */}
+      <header className="nav-premium border-b border-white/10">
+        <div className="container mx-auto px-6 py-6 flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <div className="w-12 h-12 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+              <Zap className="h-6 w-6 text-white" />
             </div>
-            <span className="text-xl font-bold gradient-text">TaskFi</span>
+            <div>
+              <span className="text-2xl font-bold text-premium">TaskFi</span>
+              <div className="text-xs text-muted-foreground font-medium tracking-wider">DECENTRALIZED MARKETPLACE</div>
+            </div>
           </div>
           
           <div className="flex items-center space-x-4">
             <ThemeToggle />
             {session ? (
-              <Button onClick={() => signOut()} variant="outline">Sign Out</Button>
+              <Button onClick={() => signOut()} className="btn-premium" size="lg">Sign Out</Button>
             ) : (
               <WalletMultiButton className="btn-glow" />
             )}
@@ -176,9 +206,7 @@ export default function Home() {
             )}
             
             <Button 
-              variant="outline" 
-              size="xl" 
-              className="border-primary/50"
+              className="bg-white/10 hover:bg-white/20 border border-white/20 hover:border-white/40 backdrop-blur-sm text-lg px-12 py-4 rounded-full transition-all duration-300"
               onClick={() => {
                 if (!publicKey) {
                   toast({
@@ -191,70 +219,80 @@ export default function Home() {
                 router.push('/browse/gigs')
               }}
             >
-              Browse Gigs
+              🎯 Explore Marketplace
             </Button>
           </div>
 
-          {/* Features Grid */}
-          <div className="grid md:grid-cols-3 gap-8 mb-16">
-            <Card className="card-hover web3-card">
-              <CardHeader>
-                <Shield className="h-12 w-12 text-primary mb-4 mx-auto" />
-                <CardTitle>Secure Escrow</CardTitle>
+          {/* Premium Features Grid */}
+          <div className="grid md:grid-cols-3 gap-8 mb-16 grid-premium">
+            <Card className="premium-card float-premium">
+              <CardHeader className="text-center">
+                <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center">
+                  <Shield className="h-10 w-10 text-white" />
+                </div>
+                <CardTitle className="text-2xl font-bold text-premium">Secure Escrow</CardTitle>
               </CardHeader>
-              <CardContent>
-                <CardDescription>
-                  Smart contract-powered escrow ensures safe payments. 
-                  Funds are released only when work is completed.
+              <CardContent className="text-center">
+                <CardDescription className="text-lg leading-relaxed">
+                  🔐 Smart contract-powered escrow ensures bulletproof payments. 
+                  Funds are cryptographically secured and released only upon work completion.
                 </CardDescription>
               </CardContent>
             </Card>
 
-            <Card className="card-hover web3-card">
-              <CardHeader>
-                <Users className="h-12 w-12 text-secondary mb-4 mx-auto" />
-                <CardTitle>Elite Talent</CardTitle>
+            <Card className="premium-card float-premium" style={{animationDelay: '1s'}}>
+              <CardHeader className="text-center">
+                <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-r from-green-400 to-blue-500 flex items-center justify-center">
+                  <Users className="h-10 w-10 text-white" />
+                </div>
+                <CardTitle className="text-2xl font-bold text-premium">Elite Talent</CardTitle>
               </CardHeader>
-              <CardContent>
-                <CardDescription>
-                  Access verified Web3 developers, designers, and specialists. 
-                  Quality over quantity, every time.
+              <CardContent className="text-center">
+                <CardDescription className="text-lg leading-relaxed">
+                  ⭐ Access hand-picked Web3 developers, designers, and blockchain specialists. 
+                  Premium quality, verified expertise, every single time.
                 </CardDescription>
               </CardContent>
             </Card>
 
-            <Card className="card-hover web3-card">
-              <CardHeader>
-                <TrendingUp className="h-12 w-12 text-accent mb-4 mx-auto" />
-                <CardTitle>Instant Payments</CardTitle>
+            <Card className="premium-card float-premium" style={{animationDelay: '2s'}}>
+              <CardHeader className="text-center">
+                <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center">
+                  <TrendingUp className="h-10 w-10 text-white" />
+                </div>
+                <CardTitle className="text-2xl font-bold text-premium">Instant Payments</CardTitle>
               </CardHeader>
-              <CardContent>
-                <CardDescription>
-                  Get paid instantly in USDC on Solana. 
-                  No waiting, no intermediaries, just pure efficiency.
+              <CardContent className="text-center">
+                <CardDescription className="text-lg leading-relaxed">
+                  ⚡ Lightning-fast USDC payments on Solana blockchain. 
+                  No delays, no intermediaries, just pure Web3 efficiency.
                 </CardDescription>
               </CardContent>
             </Card>
           </div>
 
-          {/* Stats */}
-          <div className="glass rounded-2xl p-8 mb-16">
+          {/* Premium Stats */}
+          <div className="glass-premium rounded-3xl p-12 mb-20 border border-white/10">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-              <div className="text-center">
-                <div className="text-3xl font-bold gradient-text mb-2">10K+</div>
-                <div className="text-muted-foreground">Active Freelancers</div>
+              <div className="stat-premium">
+                <div className="stat-number">25K+</div>
+                <div className="text-muted-foreground text-lg font-medium">Elite Freelancers</div>
+                <div className="w-12 h-1 bg-gradient-to-r from-blue-500 to-purple-600 mx-auto mt-3 rounded-full"></div>
               </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold gradient-text mb-2">$2M+</div>
-                <div className="text-muted-foreground">Total Earned</div>
+              <div className="stat-premium">
+                <div className="stat-number">$10M+</div>
+                <div className="text-muted-foreground text-lg font-medium">Volume Processed</div>
+                <div className="w-12 h-1 bg-gradient-to-r from-green-400 to-blue-500 mx-auto mt-3 rounded-full"></div>
               </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold gradient-text mb-2">500+</div>
-                <div className="text-muted-foreground">Projects Completed</div>
+              <div className="stat-premium">
+                <div className="stat-number">5K+</div>
+                <div className="text-muted-foreground text-lg font-medium">Projects Delivered</div>
+                <div className="w-12 h-1 bg-gradient-to-r from-purple-500 to-pink-500 mx-auto mt-3 rounded-full"></div>
               </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold gradient-text mb-2">99%</div>
-                <div className="text-muted-foreground">Satisfaction Rate</div>
+              <div className="stat-premium">
+                <div className="stat-number">99.8%</div>
+                <div className="text-muted-foreground text-lg font-medium">Success Rate</div>
+                <div className="w-12 h-1 bg-gradient-to-r from-yellow-400 to-orange-500 mx-auto mt-3 rounded-full"></div>
               </div>
             </div>
           </div>

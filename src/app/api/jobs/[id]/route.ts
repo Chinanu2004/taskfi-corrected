@@ -124,7 +124,10 @@ export async function GET(request: NextRequest, props: { params: Promise<{ id: s
   } catch (error) {
     console.error('Get job error:', error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
-   // PUT /api/jobs/[id] - Update job
+  }
+}
+
+// PUT /api/jobs/[id] - Update job
 export async function PUT(request: NextRequest, props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
   try {

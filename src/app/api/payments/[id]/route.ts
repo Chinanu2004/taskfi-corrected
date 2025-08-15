@@ -56,7 +56,10 @@ export async function GET(request: NextRequest, props: { params: Promise<{ id: s
                 name: true,
                 username: true,
                 avatarUrl: true,
-               },
+                isVerified: true,
+              }
+            }
+          }
         },
         gig: {
           select: {
@@ -71,20 +74,23 @@ export async function GET(request: NextRequest, props: { params: Promise<{ id: s
                 username: true,
                 avatarUrl: true,
                 isVerified: true,
-               },
-        },
-      },
-    })
+              }
+            }
+          }
+        }
+      }
+    });
 
     if (!payment) {
-      return NextResponse.json({ error: 'Payment not}
- found' }, { status: 404 })
+      return NextResponse.json({ error: 'Payment not found' }, { status: 404 })
+    }
+    
     // Check if user has access to this payment
     const freelancerId = payment.job?.freelancerId || payment.gig?.freelancerId
-    const hirerId = payment.job?.hirerId || payment.payerId
+    const hirerId = payment.job?.hirerId || payment.fromUserId
 
     const canView = 
-      payment.payerId === session.user.id || // Payer
+      payment.fromUserId === session.user.id || // Payer
       freelancerId === session.user.id || // Freelancer receiving payment
       PermissionService.canAccessUserManagement(session.user.role) // Admin
 
@@ -97,8 +103,8 @@ export async function GET(request: NextRequest, props: { params: Promise<{ id: s
         address: payment.escrowAddress,
         amount: payment.amount,
         currency: payment.currency,
-        canRelease: payment.payerId === session.user.id || PermissionService.canAccessUserManagement(session.user.role),
-        canDispute: payment.payerId === session.user.id,
+        canRelease: payment.fromUserId === session.user.id || PermissionService.canAccessUserManagement(session.user.role),
+        canDispute: payment.fromUserId === session.user.id,
         releaseDate: payment.releaseDate,
        return NextResponse.json({ 
       payment: {
@@ -142,7 +148,7 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ id: s
       return NextResponse.json({ error: 'Payment not}
  found' }, { status: 404 })
     const freelancerId = payment.job?.freelancerId || payment.gig?.freelancerId
-    const hirerId = payment.job?.hirerId || payment.payerId
+    const hirerId = payment.job?.hirerId || payment.fromUserId
 
     // Check permissions based on the action
     let canUpdate = false
@@ -151,7 +157,7 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ id: s
         case 'RELEASED':
           // Only payer, admin, or auto-release can release funds
           canUpdate = 
-            payment.payerId === session.user.id || 
+            payment.fromUserId === session.user.id || 
             PermissionService.canAccessUserManagement(session.user.role)
           
           if (payment.status !== 'ESCROW') {
@@ -163,7 +169,7 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ id: s
 
         case 'DISPUTED':
           // Only payer can initiate disputes
-          canUpdate = payment.payerId === session.user.id
+          canUpdate = payment.fromUserId === session.user.id
 
           if (payment.status !== 'ESCROW') {
     return NextResponse.json({ error: "Internal server error" }, { status: 400 });
@@ -288,7 +294,7 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ id: s
                 paymentId: payment.id,
                 disputeReason: updateData.disputeReason,
                 amount: payment.amount,
-                payerId: payment.payerId,
+                payerId: payment.fromUserId,
                 freelancerId: freelancerId,
                })
         // Notify freelancer
@@ -307,7 +313,7 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ id: s
         // Notify payer of refund
         await tx.notification.create({
           data: {
-            userId: payment.payerId,
+            userId: payment.fromUserId,
             type: 'PAYMENT_REFUNDED',
             title: 'Payment Refunded',
             message: `Your payment}
@@ -322,7 +328,7 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ id: s
 
         // Update user totals
         await tx.user.update({
-          where: { id: payment.payerId },
+          where: { id: payment.fromUserId },
           data: { totalSpent: { decrement: payment.amount }  })
 
         if (freelancerId) {

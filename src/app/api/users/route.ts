@@ -11,7 +11,7 @@ const createUserSchema = z.object({
   bio: z.string().max(500).optional(),
   role: z.enum(['FREELANCER', 'HIRER']),
   categories: z.array(z.string()).max(3).optional(),
-  avatarUrl: z.string().url().optional(),
+  avatarUrl: z.string().min(1).optional(),
 })
 
 const updateUserSchema = z.object({
@@ -19,7 +19,7 @@ const updateUserSchema = z.object({
   username: z.string().min(3).max(30).regex(/^[a-zA-Z0-9_]+$/).optional(),
   bio: z.string().max(500).optional(),
   categories: z.array(z.string()).max(3).optional(),
-  avatarUrl: z.string().url().optional(),
+  avatarUrl: z.string().min(1).optional(),
 })
 
 const getUsersQuerySchema = z.object({

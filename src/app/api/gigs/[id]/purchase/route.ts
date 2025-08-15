@@ -70,7 +70,8 @@ export async function POST(request: NextRequest, props: { params: Promise<{ id: 
     let deliveryDays = selectedPackage.deliveryDays
     if (purchaseData.urgentDelivery) {
       deliveryDays = Math.ceil(deliveryDays / 2) // Half the delivery time
-     const expectedDelivery = new Date()
+    }
+    const expectedDelivery = new Date()
     expectedDelivery.setDate(expectedDelivery.getDate() + deliveryDays)
 
     // Create payment record with escrow
@@ -80,25 +81,21 @@ export async function POST(request: NextRequest, props: { params: Promise<{ id: 
         data: {
           amount: totalAmount,
           status: 'ESCROW', // Money goes to escrow
-          payerId: session.user.id,
+          fromUserId: session.user.id,
+          toUserId: gig.freelancerId,
           gigId: gig.id,
-          packageDetails: {
-            packageIndex: purchaseData.packageIndex,
-            packageName: selectedPackage.name,
-            originalPrice: selectedPackage.price,
-            urgentDelivery: purchaseData.urgentDelivery,
-            requirements: purchaseData.requirements,
-            attachments: purchaseData.attachments,
-            customizations: purchaseData.customizations,
-            deliveryDays: deliveryDays,
-            expectedDelivery: expectedDelivery.toISOString(),
-            revisions: selectedPackage.revisions,
-            features: selectedPackage.features,
-          },
           releaseDate: expectedDelivery,
         },
         include: {
-          freelancer: {
+          fromUser: {
+            select: {
+              id: true,
+              name: true,
+              username: true,
+              avatarUrl: true,
+            }
+          },
+          toUser: {
             select: {
               id: true,
               name: true,
@@ -111,22 +108,26 @@ export async function POST(request: NextRequest, props: { params: Promise<{ id: 
               id: true,
               title: true,
             }
-          });
+          }
+        });
 
       // Update gig order count
       await tx.gig.update({
         where: { id: gig.id },
-        data: { orderCount: { increment: 1 }  })
+        data: { orderCount: { increment: 1 } }
+      });
 
       // Update freelancer total earned (pending)
       await tx.user.update({
         where: { id: gig.freelancerId },
-        data: { totalEarned: { increment: totalAmount }  })
+        data: { totalEarned: { increment: totalAmount } }
+      });
 
       // Update buyer total spent
       await tx.user.update({
         where: { id: session.user.id },
-        data: { totalSpent: { increment: totalAmount }  })
+        data: { totalSpent: { increment: totalAmount } }
+      });
 
       // Create notification for freelancer
       await tx.notification.create({
@@ -141,7 +142,9 @@ export async function POST(request: NextRequest, props: { params: Promise<{ id: 
             packageName: selectedPackage.name,
             amount: totalAmount,
             buyerId: session.user.id
-           })
+          }
+        }
+      });
 
       // Create notification for buyer
       await tx.notification.create({
@@ -155,7 +158,9 @@ export async function POST(request: NextRequest, props: { params: Promise<{ id: 
             paymentId: payment.id,
             freelancerId: gig.freelancerId,
             expectedDelivery: expectedDelivery.toISOString()
-           })
+          }
+        }
+      });
 
       // Start a message thread for this order
       await tx.message.create({
@@ -165,7 +170,8 @@ export async function POST(request: NextRequest, props: { params: Promise<{ id: 
           content: `Hi! I just purchased your gig "${gig.title}". Here are my requirements:\n\n${purchaseData.requirements}${purchaseData.customizations ? '\n\nAdditional customizations:\n' + purchaseData.customizations : ''}`,
           type: 'ORDER_MESSAGE',
           orderId: payment.id,
-         })
+        }
+      });
 
       return payment
     });
@@ -179,12 +185,9 @@ export async function POST(request: NextRequest, props: { params: Promise<{ id: 
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: "Invalid purchase data" }, { status: 400 });
-     console.error('Purchase gig error:', error);
+    }
+    console.error('Purchase gig error:', error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
-}}}}
-}}}}}}}}}}}
-}}
-}}
 }

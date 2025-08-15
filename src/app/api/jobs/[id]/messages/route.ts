@@ -16,7 +16,8 @@ const pusher = new Pusher({
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string }  ) {
+  { params }: { params: { id: string } }
+) {
   try {
     const session = await getServerSession(authOptions);
     if (!session || !session.user) {
@@ -99,12 +100,16 @@ export async function GET(
       hasMore: messages.length === limit,
       currentPage: page,
     });
-    } catch (error) {
+  } catch (error) {
     console.error('Error fetching messages:', error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
-   export async function POST(
+  }
+}
+
+export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string }  ) {
+  { params }: { params: { id: string } }
+) {
   try {
     const session = await getServerSession(authOptions);
     if (!session || !session.user) {

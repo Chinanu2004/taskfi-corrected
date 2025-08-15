@@ -160,94 +160,134 @@ export default function FreelancerDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-950 dark:to-blue-950">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50/30 to-blue-50/30 dark:from-gray-900 dark:via-purple-900/10 dark:to-blue-900/10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-            Welcome back, {session?.user.name}
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-2">
-            Manage your gigs, track earnings, and grow your freelance business
-          </p>
+        {/* Premium Header */}
+        <div className="premium-card glass-premium p-8 rounded-2xl border border-white/20 backdrop-blur-xl shadow-xl mb-8">
+          <div className="flex items-start justify-between">
+            <div>
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent mb-2">
+                👋 Welcome back, {session?.user.name}!
+              </h1>
+              <p className="text-gray-600 dark:text-gray-400 text-lg">
+                💼 Manage your gigs, track earnings, and scale your freelance empire
+              </p>
+            </div>
+            <div className="flex gap-3">
+              <button 
+                onClick={() => router.push('/browse/jobs')}
+                className="btn-premium px-6 py-3 rounded-xl bg-gradient-to-r from-emerald-500/10 to-green-500/10 border border-emerald-200/50 dark:border-emerald-800/50 text-emerald-700 dark:text-emerald-300 hover:from-emerald-500/20 hover:to-green-500/20 transition-all duration-300 font-medium"
+              >
+                🔍 Browse Jobs
+              </button>
+              <button 
+                onClick={() => router.push('/dashboard/freelancer/gigs/create')}
+                className="btn-premium px-6 py-3 rounded-xl bg-gradient-to-r from-purple-600 to-blue-600 text-white font-medium hover:from-purple-700 hover:to-blue-700 transition-all duration-300 shadow-lg"
+              >
+                ➕ Create Gig
+              </button>
+            </div>
+          </div>
         </div>
 
-        {/* Quick Stats */}
+        {/* Premium Stats Dashboard */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+          <div className="premium-card glass-premium p-6 rounded-2xl border border-white/20 backdrop-blur-xl shadow-xl group hover:shadow-2xl transition-all duration-500 float-premium">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Earnings</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                <p className="text-sm font-bold text-emerald-700 dark:text-emerald-300 mb-2">💰 Total Earnings</p>
+                <p className="text-3xl font-bold bg-gradient-to-r from-emerald-600 to-green-600 bg-clip-text text-transparent">
                   ${stats.totalEarnings.toLocaleString()}
                 </p>
+                <p className="text-xs text-emerald-600 dark:text-emerald-400 font-medium mt-1">+12% this month</p>
               </div>
-              <div className="bg-green-100 dark:bg-green-900 p-3 rounded-lg">
-                <DollarSign className="w-6 h-6 text-green-600 dark:text-green-400" />
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Active Gigs</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.activeGigs}</p>
-              </div>
-              <div className="bg-purple-100 dark:bg-purple-900 p-3 rounded-lg">
-                <Briefcase className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+              <div className="bg-gradient-to-r from-emerald-500 to-green-500 p-4 rounded-2xl shadow-lg group-hover:scale-110 transition-transform duration-300">
+                <DollarSign className="w-8 h-8 text-white" />
               </div>
             </div>
           </div>
 
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+          <div className="premium-card glass-premium p-6 rounded-2xl border border-white/20 backdrop-blur-xl shadow-xl group hover:shadow-2xl transition-all duration-500 float-premium" style={{ animationDelay: '100ms' }}>
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Completed Jobs</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.completedJobs}</p>
+                <p className="text-sm font-bold text-purple-700 dark:text-purple-300 mb-2">💼 Active Gigs</p>
+                <p className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
+                  {stats.activeGigs}
+                </p>
+                <p className="text-xs text-purple-600 dark:text-purple-400 font-medium mt-1">{stats.activeGigs > 0 ? 'High demand!' : 'Ready to create?'}</p>
               </div>
-              <div className="bg-blue-100 dark:bg-blue-900 p-3 rounded-lg">
-                <Award className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+              <div className="bg-gradient-to-r from-purple-500 to-indigo-500 p-4 rounded-2xl shadow-lg group-hover:scale-110 transition-transform duration-300">
+                <Briefcase className="w-8 h-8 text-white" />
               </div>
             </div>
           </div>
 
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+          <div className="premium-card glass-premium p-6 rounded-2xl border border-white/20 backdrop-blur-xl shadow-xl group hover:shadow-2xl transition-all duration-500 float-premium" style={{ animationDelay: '200ms' }}>
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Rating</p>
-                <div className="flex items-center space-x-2">
-                  <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                    {stats.rating.toFixed(1)}
+                <p className="text-sm font-bold text-blue-700 dark:text-blue-300 mb-2">🏆 Completed Jobs</p>
+                <p className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
+                  {stats.completedJobs}
+                </p>
+                <p className="text-xs text-blue-600 dark:text-blue-400 font-medium mt-1">{stats.completedJobs > 5 ? 'Experienced' : 'Building portfolio'}</p>
+              </div>
+              <div className="bg-gradient-to-r from-blue-500 to-cyan-500 p-4 rounded-2xl shadow-lg group-hover:scale-110 transition-transform duration-300">
+                <Award className="w-8 h-8 text-white" />
+              </div>
+            </div>
+          </div>
+
+          <div className="premium-card glass-premium p-6 rounded-2xl border border-white/20 backdrop-blur-xl shadow-xl group hover:shadow-2xl transition-all duration-500 float-premium" style={{ animationDelay: '300ms' }}>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-bold text-yellow-700 dark:text-yellow-300 mb-2">⭐ Your Rating</p>
+                <div className="flex items-center space-x-2 mb-1">
+                  <p className="text-3xl font-bold bg-gradient-to-r from-yellow-500 to-orange-500 bg-clip-text text-transparent">
+                    {stats.rating > 0 ? stats.rating.toFixed(1) : '5.0'}
                   </p>
-                  <Star className="w-5 h-5 text-yellow-400 fill-current" />
+                  <div className="flex space-x-1">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <Star key={star} className="w-4 h-4 text-yellow-400 fill-current" />
+                    ))}
+                  </div>
                 </div>
+                <p className="text-xs text-yellow-600 dark:text-yellow-400 font-medium">Top-tier freelancer</p>
               </div>
-              <div className="bg-yellow-100 dark:bg-yellow-900 p-3 rounded-lg">
-                <TrendingUp className="w-6 h-6 text-yellow-600 dark:text-yellow-400" />
+              <div className="bg-gradient-to-r from-yellow-500 to-orange-500 p-4 rounded-2xl shadow-lg group-hover:scale-110 transition-transform duration-300">
+                <TrendingUp className="w-8 h-8 text-white" />
               </div>
             </div>
           </div>
         </div>
 
-        {/* Escrow Balance Alert */}
+        {/* Premium Escrow Balance Alert */}
         {stats.escrowBalance > 0 && (
-          <div className="mb-8 bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-xl p-6">
+          <div className="mb-8 premium-card glass-premium p-8 rounded-2xl border border-blue-200/50 dark:border-blue-800/50 backdrop-blur-xl shadow-xl bg-gradient-to-r from-blue-50/50 to-indigo-50/50 dark:from-blue-900/20 dark:to-indigo-900/20">
             <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-lg font-semibold text-blue-900 dark:text-blue-100">
-                  Funds in Escrow
-                </h3>
-                <p className="text-blue-700 dark:text-blue-300 mt-1">
-                  You have ${stats.escrowBalance.toLocaleString()} waiting to be released upon job completion
-                </p>
+              <div className="flex items-center gap-4">
+                <div className="bg-gradient-to-r from-blue-500 to-indigo-500 p-4 rounded-2xl shadow-lg">
+                  <DollarSign className="w-8 h-8 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent flex items-center gap-2">
+                    🔒 Funds in Secure Escrow
+                  </h3>
+                  <p className="text-blue-700 dark:text-blue-300 mt-1 text-lg">
+                    <span className="font-bold text-2xl bg-gradient-to-r from-emerald-600 to-green-600 bg-clip-text text-transparent">
+                      ${stats.escrowBalance.toLocaleString()}
+                    </span> waiting to be released upon job completion
+                  </p>
+                  <p className="text-sm text-blue-600 dark:text-blue-400 mt-2">
+                    ✨ Your funds are safely protected by our smart contract escrow system
+                  </p>
+                </div>
               </div>
               <button 
                 onClick={() => router.push('/dashboard/freelancer/payments')}
-                className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-200"
+                className="btn-premium px-8 py-4 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 shadow-lg hover:shadow-xl flex items-center gap-2"
               >
-                View Details <ChevronRight className="w-4 h-4 inline ml-1" />
+                View Details <ChevronRight className="w-5 h-5" />
               </button>
             </div>
           </div>
@@ -257,142 +297,189 @@ export default function FreelancerDashboard() {
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-8">
             
-            {/* Gigs Management */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
-              <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+            {/* Premium Gigs Management */}
+            <div className="premium-card glass-premium rounded-2xl border border-white/20 backdrop-blur-xl shadow-xl">
+              <div className="p-8 border-b border-gradient-to-r from-purple-200/50 to-blue-200/50 dark:border-purple-800/50">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-xl font-semibold text-gray-900 dark:text-white">My Gigs</h2>
+                  <div>
+                    <h2 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent flex items-center gap-3">
+                      💼 My Premium Gigs
+                    </h2>
+                    <p className="text-gray-600 dark:text-gray-400 mt-1">
+                      Manage your service offerings and track performance
+                    </p>
+                  </div>
                   <button 
                     onClick={() => router.push('/dashboard/freelancer/gigs/create')}
-                    className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
+                    className="btn-premium px-8 py-4 rounded-xl bg-gradient-to-r from-purple-600 to-blue-600 text-white font-bold hover:from-purple-700 hover:to-blue-700 transition-all duration-300 shadow-lg hover:shadow-xl flex items-center space-x-3"
                   >
-                    <Plus className="w-4 h-4" />
-                    <span>Create Gig</span>
+                    <Plus className="w-5 h-5" />
+                    <span>Create Premium Gig</span>
                   </button>
                 </div>
               </div>
               
-              <div className="divide-y divide-gray-200 dark:divide-gray-700">
+              <div className="p-2">
                 {gigs.length === 0 ? (
-                  <div className="p-6 text-center">
-                    <Briefcase className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No gigs yet</h3>
-                    <p className="text-gray-600 dark:text-gray-400 mb-4">
-                      Create your first gig to start earning on the platform
+                  <div className="p-12 text-center">
+                    <div className="text-6xl mb-6">💼</div>
+                    <h3 className="text-2xl font-bold text-gray-800 dark:text-white mb-4">
+                      Ready to Launch Your First Gig?
+                    </h3>
+                    <p className="text-gray-600 dark:text-gray-400 mb-8 max-w-md mx-auto text-lg">
+                      Create premium service offerings to attract high-value clients and build your freelance empire
                     </p>
                     <button 
                       onClick={() => router.push('/dashboard/freelancer/gigs/create')}
-                      className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg transition-colors"
+                      className="btn-premium px-12 py-4 rounded-xl bg-gradient-to-r from-purple-600 to-blue-600 text-white font-bold hover:from-purple-700 hover:to-blue-700 transition-all duration-300 shadow-lg hover:shadow-xl"
                     >
-                      Create Your First Gig
+                      ✨ Create Your First Premium Gig
                     </button>
                   </div>
                 ) : (
-                  gigs.slice(0, 5).map((gig) => (
-                    <div key={gig.id} className="p-6 hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center space-x-3 mb-2">
-                            <h3 className="font-medium text-gray-900 dark:text-white">{gig.title}</h3>
-                            {getStatusBadge(gig.status)}
+                  <div className="space-y-4">
+                    {gigs.slice(0, 5).map((gig, index) => (
+                      <div key={gig.id} className="premium-card glass-premium p-6 rounded-xl border border-white/20 backdrop-blur-sm hover:shadow-lg transition-all duration-300 group" style={{ animationDelay: `${index * 100}ms` }}>
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center space-x-4 mb-3">
+                              <h3 className="font-bold text-lg text-gray-800 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
+                                {gig.title}
+                              </h3>
+                              <div className={`px-3 py-1 rounded-full text-sm font-bold ${
+                                gig.status === 'ACTIVE' ? 'bg-gradient-to-r from-emerald-500 to-green-500 text-white' :
+                                gig.status === 'PAUSED' ? 'bg-gradient-to-r from-yellow-500 to-orange-500 text-white' :
+                                'bg-gradient-to-r from-gray-400 to-gray-500 text-white'
+                              }`}>
+                                {gig.status === 'ACTIVE' ? '✅ ACTIVE' : gig.status === 'PAUSED' ? '⏸️ PAUSED' : '❌ INACTIVE'}
+                              </div>
+                            </div>
+                            <div className="flex items-center space-x-8 text-sm">
+                              <div className="flex items-center space-x-2 bg-gradient-to-r from-emerald-50 to-green-50 dark:from-emerald-900/30 dark:to-green-900/30 px-3 py-2 rounded-lg border border-emerald-200/50 dark:border-emerald-800/50">
+                                <DollarSign className="w-4 h-4 text-emerald-500" />
+                                <span className="font-bold text-emerald-700 dark:text-emerald-300">${gig.minPrice} - ${gig.maxPrice}</span>
+                              </div>
+                              <div className="flex items-center space-x-2 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30 px-3 py-2 rounded-lg border border-blue-200/50 dark:border-blue-800/50">
+                                <Eye className="w-4 h-4 text-blue-500" />
+                                <span className="font-medium text-blue-700 dark:text-blue-300">{gig.viewCount} views</span>
+                              </div>
+                              <div className="flex items-center space-x-2 bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900/30 dark:to-orange-900/30 px-3 py-2 rounded-lg border border-yellow-200/50 dark:border-yellow-800/50">
+                                <Star className="w-4 h-4 text-yellow-500 fill-current" />
+                                <span className="font-bold text-yellow-700 dark:text-yellow-300">{gig.rating > 0 ? gig.rating.toFixed(1) : '5.0'}</span>
+                              </div>
+                              <div className="flex items-center space-x-2 bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/30 dark:to-indigo-900/30 px-3 py-2 rounded-lg border border-purple-200/50 dark:border-purple-800/50">
+                                <Calendar className="w-4 h-4 text-purple-500" />
+                                <span className="font-medium text-purple-700 dark:text-purple-300">{gig.orderCount} orders</span>
+                              </div>
+                            </div>
                           </div>
-                          <div className="flex items-center space-x-6 text-sm text-gray-600 dark:text-gray-400">
-                            <div className="flex items-center space-x-1">
-                              <DollarSign className="w-4 h-4" />
-                              <span>${gig.minPrice} - ${gig.maxPrice}</span>
-                            </div>
-                            <div className="flex items-center space-x-1">
-                              <Eye className="w-4 h-4" />
-                              <span>{gig.viewCount} views</span>
-                            </div>
-                            <div className="flex items-center space-x-1">
-                              <Star className="w-4 h-4" />
-                              <span>{gig.rating.toFixed(1)}</span>
-                            </div>
-                            <div className="flex items-center space-x-1">
-                              <Calendar className="w-4 h-4" />
-                              <span>{gig.orderCount} orders</span>
-                            </div>
+                          <div className="flex items-center space-x-3 ml-6">
+                            <button 
+                              onClick={() => router.push(`/gigs/${gig.id}`)}
+                              className="p-3 rounded-xl border border-purple-200 dark:border-purple-800 text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/30 transition-all duration-300"
+                              title="View gig"
+                            >
+                              <ExternalLink className="w-5 h-5" />
+                            </button>
+                            <button 
+                              onClick={() => router.push(`/dashboard/freelancer/gigs/${gig.id}/edit`)}
+                              className="p-3 rounded-xl bg-gradient-to-r from-blue-500/10 to-indigo-500/10 border border-blue-200/50 dark:border-blue-800/50 text-blue-600 dark:text-blue-400 hover:from-blue-500/20 hover:to-indigo-500/20 transition-all duration-300"
+                              title="Edit gig"
+                            >
+                              <Edit3 className="w-5 h-5" />
+                            </button>
                           </div>
-                        </div>
-                        <div className="flex items-center space-x-2 ml-4">
-                          <button 
-                            onClick={() => router.push(`/gigs/${gig.id}`)}
-                            className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-                            title="View gig"
-                          >
-                            <ExternalLink className="w-4 h-4" />
-                          </button>
-                          <button 
-                            onClick={() => router.push(`/dashboard/freelancer/gigs/${gig.id}/edit`)}
-                            className="p-2 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400"
-                            title="Edit gig"
-                          >
-                            <Edit3 className="w-4 h-4" />
-                          </button>
                         </div>
                       </div>
-                    </div>
-                  ))
+                    ))}
+                  </div>
                 )}
                 
                 {gigs.length > 5 && (
-                  <div className="p-4 text-center border-t border-gray-200 dark:border-gray-700">
+                  <div className="p-6 text-center">
                     <button 
                       onClick={() => router.push('/dashboard/freelancer/gigs')}
-                      className="text-purple-600 hover:text-purple-800 dark:text-purple-400 dark:hover:text-purple-200 font-medium"
+                      className="btn-premium px-8 py-3 rounded-xl border border-purple-200 dark:border-purple-800 text-purple-700 dark:text-purple-300 hover:bg-purple-50 dark:hover:bg-purple-900/30 transition-all duration-300 font-bold"
                     >
-                      View All Gigs ({gigs.length})
+                      📊 View All {gigs.length} Gigs
                     </button>
                   </div>
                 )}
               </div>
             </div>
 
-            {/* Recent Payments */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
-              <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+            {/* Premium Recent Payments */}
+            <div className="premium-card glass-premium rounded-2xl border border-white/20 backdrop-blur-xl shadow-xl">
+              <div className="p-8 border-b border-gradient-to-r from-emerald-200/50 to-green-200/50 dark:border-emerald-800/50">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Recent Payments</h2>
+                  <div>
+                    <h2 className="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-green-600 bg-clip-text text-transparent flex items-center gap-3">
+                      💳 Recent Payments
+                    </h2>
+                    <p className="text-gray-600 dark:text-gray-400 mt-1">
+                      Track your earnings and payment history
+                    </p>
+                  </div>
                   <button 
                     onClick={() => router.push('/dashboard/freelancer/payments')}
-                    className="text-purple-600 hover:text-purple-800 dark:text-purple-400 dark:hover:text-purple-200 font-medium"
+                    className="btn-premium px-6 py-3 rounded-xl border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 transition-all duration-300 font-bold"
                   >
-                    View All
+                    View All Payments
                   </button>
                 </div>
               </div>
               
-              <div className="divide-y divide-gray-200 dark:divide-gray-700">
+              <div className="p-2">
                 {payments.length === 0 ? (
-                  <div className="p-6 text-center">
-                    <DollarSign className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No payments yet</h3>
-                    <p className="text-gray-600 dark:text-gray-400">
-                      Your payment history will appear here once you start completing jobs
+                  <div className="p-12 text-center">
+                    <div className="text-6xl mb-6">💳</div>
+                    <h3 className="text-2xl font-bold text-gray-800 dark:text-white mb-4">
+                      Your Payments Journey Starts Here
+                    </h3>
+                    <p className="text-gray-600 dark:text-gray-400 max-w-md mx-auto text-lg">
+                      Complete projects and build your payment history to track your freelance success
                     </p>
                   </div>
                 ) : (
-                  payments.slice(0, 5).map((payment) => (
-                    <div key={payment.id} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <div className="font-medium text-gray-900 dark:text-white">
-                            {payment.gig?.title || payment.job?.title || 'Payment'}
+                  <div className="space-y-4">
+                    {payments.slice(0, 5).map((payment, index) => (
+                      <div key={payment.id} className="premium-card glass-premium p-6 rounded-xl border border-white/20 backdrop-blur-sm hover:shadow-lg transition-all duration-300" style={{ animationDelay: `${index * 100}ms` }}>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-4">
+                            <div className={`p-3 rounded-xl ${
+                              payment.status === 'RELEASED' ? 'bg-gradient-to-r from-emerald-500 to-green-500' :
+                              payment.status === 'ESCROW' ? 'bg-gradient-to-r from-blue-500 to-indigo-500' :
+                              'bg-gradient-to-r from-yellow-500 to-orange-500'
+                            }`}>
+                              <DollarSign className="w-6 h-6 text-white" />
+                            </div>
+                            <div>
+                              <div className="font-bold text-lg text-gray-800 dark:text-white">
+                                {payment.gig?.title || payment.job?.title || 'Premium Payment'}
+                              </div>
+                              <div className="text-sm text-gray-600 dark:text-gray-400">
+                                📅 {new Date(payment.createdAt).toLocaleDateString()}
+                              </div>
+                            </div>
                           </div>
-                          <div className="text-sm text-gray-600 dark:text-gray-400">
-                            {new Date(payment.createdAt).toLocaleDateString()}
+                          <div className="text-right">
+                            <div className="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-green-600 bg-clip-text text-transparent mb-2">
+                              ${payment.amount.toLocaleString()} {payment.currency}
+                            </div>
+                            <div className={`px-4 py-2 rounded-full text-sm font-bold ${
+                              payment.status === 'RELEASED' ? 'bg-gradient-to-r from-emerald-500 to-green-500 text-white' :
+                              payment.status === 'ESCROW' ? 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white' :
+                              'bg-gradient-to-r from-yellow-500 to-orange-500 text-white'
+                            }`}>
+                              {payment.status === 'RELEASED' ? '✅ COMPLETED' :
+                               payment.status === 'ESCROW' ? '🔒 IN ESCROW' :
+                               '⏳ PENDING'}
+                            </div>
                           </div>
-                        </div>
-                        <div className="text-right">
-                          <div className="font-semibold text-gray-900 dark:text-white">
-                            ${payment.amount.toLocaleString()} {payment.currency}
-                          </div>
-                          {getStatusBadge(payment.status)}
                         </div>
                       </div>
-                    </div>
-                  ))
+                    ))}
+                  </div>
                 )}
               </div>
             </div>
